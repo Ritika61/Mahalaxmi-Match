@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: (title || 'Products') }) %>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active: 'products', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px">
+      <h1 style="margin:0">Products</h1>
+      <a class="btn" href="/admin/products/new">+ Add product</a>
+    </div>
+
+    <% if (!items || items.length === 0) { %>
+      <div class="card" style="padding:16px">No products yet.</div>
+    <% } else { %>
+
+      <%
+      // -------- Helpers (local to this view) --------
+      function productImg(rawPath){
+        let raw = (rawPath || '').toString().trim();
+        if (!raw) return '/img/product-placeholder.jpg';
+
+        raw = raw.replace(/\\/g,'/');                  // windows slashes -> forward
+        const m = raw.match(/\/public(\/.+)$/i);       // strip absolute disk path to web
+        if (m) raw = m[1];
+
+        if (/^https?:\/\//i.test(raw)) return raw;     // absolute URL already good
+        if (!raw.startsWith('/')) raw = '/' + raw;     // ensure site-absolute
+
+        // If not under /img/, assume just a filename and put under /img/products/
+        if (!/^\/img\//.test(raw)) raw = '/img/products/' + raw.split('/').pop();
+        return raw;
+      }
+
+      function previewText(txt){
+        const s = (txt || '').toString().trim();
+        if (!s) return '';
+        const m = s.match(/[^.!?]+[.!?]/);
+        if (m && m[0]) return m[0].trim();
+        return s.length > 140 ? (s.slice(0,137).trim() + '…') : s;
+      }
+      %>
+
+      <ul class="cards" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;list-style:none;margin:0;padding:0">
+        <% items.forEach(p => { %>
+          <li class="card" style="display:flex;flex-direction:column;overflow:hidden">
+            <!-- Image -->
+            <div style="aspect-ratio:16/9;overflow:hidden;border-radius:12px;margin:-18px -18px 12px -18px;background:#000">
+              <img
+                src="<%= p.image %>"
+                alt="<%= p.name %>"
+                title="<%= p.name %>"
+                loading="lazy"
+                decoding="async"
+                style="width:100%;height:100%;object-fit:cover;display:block"
+                onerror="this.onerror=null;this.src='/img/product-placeholder.jpg'">
+            </div>
+
+            <!-- Header row: name + status -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <h3 style="margin:0;flex:1;line-height:1.2"><%= p.name %></h3>
+              <span class="small"
+                    style="padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.18);opacity:.9">
+                <%= p.active ? 'Active' : 'Hidden' %>
+              </span>
+            </div>
+
+            <!-- Meta -->
+            <div class="small text-sub" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+              <span> /<%= p.slug %> </span>
+              <% if (p.category) { %>
+                <span aria-hidden="true">•</span>
+                <span><%= p.category %></span>
+              <% } %>
+            </div>
+
+            <!-- Preview -->
+            <% const blurb = previewText(p.short_desc || p.description); %>
+            <% if (blurb) { %>
+              <p class="text-sub" style="margin:0 0 12px"><%= blurb %></p>
+            <% } %>
+
+            <div class="small text-sub" style="margin-bottom:14px">
+              Added: <%= new Date(p.created_at).toLocaleString() %>
+            </div>
+
+            <!-- Actions -->
+            <div style="margin-top:auto;display:flex;gap:8px;flex-wrap:wrap">
+              <a class="btn-outline" href="/products/<%= p.slug %>" target="_blank" rel="noopener">View</a>
+              <a class="btn-outline" href="/admin/products/<%= p.id %>/edit">Edit</a>
+              <form action="/admin/products/<%= p.id %>/delete"
+      method="POST"
+      style="display:inline"
+      onsubmit="return confirm('Do you want to delete “<%= p.name %>”?')">
+
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn-outline" type="submit">Delete</button>
+              </form>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </main>
+
+</body>
+</html>

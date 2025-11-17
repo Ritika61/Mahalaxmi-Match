@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head><%- include('../partials/head', { title }) %></head>
+  <body>
+    <%- include('../partials/header') %>
+    <main class="container section">
+      <a href="/products" class="btn-outline">← Back to products</a>
+      <div class="section">
+        <h1><%= item.name %></h1>
+        <% if (item.image) { %>
+          <img src="<%= item.image %>" alt="<%= item.name %>" style="max-width:520px;border-radius:16px;margin:10px 0;">
+        <% } %>
+        <p class="text-sub"><%= item.short_desc %></p>
+        <div><%- (item.description || '') %></div>
+        <% if (item.specs) { 
+             let specs = item.specs;
+             try { specs = typeof specs === 'string' ? JSON.parse(specs) : specs; } catch {}
+        %>
+          <h3>Specifications</h3>
+          <ul>
+            <% Object.keys(specs || {}).forEach(k => { %>
+              <li><strong><%= k %>:</strong> <%= specs[k] %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </main>
+    <%- include('../partials/footer') %>
+  </body>
+</html>

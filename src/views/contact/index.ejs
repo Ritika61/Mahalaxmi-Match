@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'Contact — Profile' }) %>
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root{ --ink:#e5e7eb; --muted:rgba(229,231,235,.78); --brand:#79c3ff; --panel:rgba(255,255,255,.04); --line:rgba(255,255,255,.14); --shadow:0 12px 28px rgba(0,0,0,.30); --radius:16px; }
+    html,body{background:#0b0f14;color:var(--ink);}
+
+    .contact-banner{
+      padding:75px 20px;border-radius:0 0 20px 20px;position:relative;isolation:isolate;
+      background:
+        linear-gradient(135deg, rgba(12,16,22,.92) 0%, rgba(12,16,22,.78) 55%, rgba(12,16,22,.65) 100%),
+        url('/img/contact-hero.jpg') center/cover no-repeat;
+    }
+    .contact-banner::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(1200px 500px at 10% -10%, rgba(121,195,255,.18), transparent 70%);}
+    .banner-content{max-width:1100px;margin:0 auto;display:flex;gap:28px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .banner-content h1{margin:0 0 8px;font-size:42px;line-height:1.1;font-weight:800;letter-spacing:.2px}
+    .banner-content p{margin:0 0 18px;font-size:18px;color:var(--muted)}
+    .banner-content img{max-width:100%;height:auto;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);opacity:.95}
+    .contact-button{background:linear-gradient(180deg, rgba(121,195,255,.28), rgba(121,195,255,.16));color:var(--ink);border:1px solid rgba(121,195,255,.55);border-radius:999px;padding:12px 22px;font-weight:700;display:inline-flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,.28);transition:.15s ease;}
+    .contact-button:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(0,0,0,.34)}
+
+    .contact-wrap{max-width:1100px;margin:34px auto 40px;padding:0 20px;display:flex;gap:20px;align-items:flex-start}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:saturate(1.1) blur(2px);}
+    .card .card-body{padding:32px}
+    .profile-form{flex:1 1 520px}
+    .contact-info{flex:1 1 420px}
+
+    .profile-form h2,.info-title{color:var(--brand);letter-spacing:.3px}
+
+    /* ⬆️ “Reach us” bigger & bolder */
+    .info-title{
+      padding:35px 22px;
+      border-bottom:1px solid var(--line);
+      font-weight:800;           /* was 500 */
+      font-size:28px;            /* added */
+      line-height:1.2;           /* added */
+      margin:0;
+    }
+
+    .flash{border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:600}
+    .flash-ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+    .flash-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+
+    .field{display:grid;gap:6px;margin-bottom:14px}
+    .field label{font-weight:600;color:var(--ink)}
+    .field input,.profile-form textarea{
+      width:100%;padding:12px 12px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);color:var(--ink);font-size:15px;outline:none;
+      transition:border-color .14s,box-shadow .14s,background .14s
+    }
+    .field input::placeholder,.profile-form textarea::placeholder{color:rgba(229,231,235,.55)}
+    .field input:focus,.profile-form textarea:focus{border-color:rgba(121,195,255,.55);box-shadow:0 0 0 3px rgba(121,195,255,.22);background:rgba(255,255,255,.06)}
+    .profile-form button[type="submit"]{
+      background:linear-gradient(180deg, rgba(121,195,255,.28), rgba(121,195,255,.16));
+      color:var(--ink);border:1px solid rgba(121,195,255,.55);border-radius:12px;padding:10px 18px;font-weight:700;cursor:pointer;
+      box-shadow:0 10px 22px rgba(0,0,0,.28);transition:transform .15s, box-shadow .15s
+    }
+    .profile-form button[type="submit"]:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(0,0,0,.34)}
+
+    .info-body{padding:18px 22px}
+    .contact-map{margin-bottom:14px;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+
+    /* ⬆️ Map height increased */
+    .contact-map iframe{display:block;width:100%;height:400px;border:0;background:#000}
+
+    .info-row{display:flex;align-items:center;gap:12px;margin:10px 0;color:var(--ink)}
+    .info-row i{color:var(--brand);opacity:.95}
+    .info-row a{color:inherit;text-decoration:none;border-bottom:1px dashed transparent}
+    .info-row a:hover{border-bottom-color:rgba(121,195,255,.6)}
+
+    @media (max-width:980px){
+      .contact-wrap{flex-direction:column}
+      .banner-content{flex-direction:column;text-align:left}
+      .banner-content h1{font-size:34px}
+      .contact-map iframe{height:340px;} /* mobile-friendly height */
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <section class="contact-banner">
+    <div class="banner-content">
+      <div>
+        <h1>Contact us</h1>
+        <p>Have any questions? We would love to hear from you.</p>
+        <button class="contact-button" id="openContact">
+          <i class="fa-solid fa-phone"></i> Contact
+        </button>
+      </div>
+      <div aria-hidden="true" style="flex:1 1 420px;text-align:center">
+        <img src="/img/contact-banner.png" alt="" />
+      </div>
+    </div>
+  </section>
+
+  <div class="contact-wrap" id="contactWrap" style="display:flex">
+    <section class="card profile-form" aria-labelledby="profileFormTitle">
+      <div class="card-body">
+        <h2 id="profileFormTitle" style="margin:0 0 10px">Send a message</h2>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="flash flash-err"><%- error %></div>
+        <% } %>
+        <% if (typeof success !== 'undefined' && success) { %>
+          <div class="flash flash-ok"><%- success %></div>
+        <% } %>
+
+        <form method="POST" action="/contact" novalidate id="contactForm" autocomplete="on">
+          <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <% } %>
+
+          <input type="text" name="companyFaxNumber" tabindex="-1" autocomplete="off"
+                 style="position:absolute;left:-9999px;opacity:0">
+
+          <div class="field">
+            <label for="name">Your Name</label>
+            <input id="name" type="text" name="name" placeholder="Your Name" required
+                   value="<%= (data && data.name) || '' %>" autocomplete="name">
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" placeholder="you@company.com" required
+                   value="<%= (data && data.email) || '' %>" autocomplete="email">
+          </div>
+
+          <div class="field">
+            <label for="country">Country</label>
+            <input id="country" type="text" name="country" placeholder="Country" required
+                   value="<%= (data && data.country) || '' %>" autocomplete="country-name">
+          </div>
+
+          <div class="field">
+            <label for="company">Company</label>
+            <input id="company" type="text" name="company" placeholder="Company Name"
+                   value="<%= (data && data.company) || '' %>" autocomplete="organization">
+          </div>
+
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" placeholder="Tell us about your needs…" required><%= (data && data.message) || '' %></textarea>
+          </div>
+
+          <button type="submit" id="sendBtn">
+            <i class="fa-solid fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+
+        <div id="flash"
+             data-success="<%= success ? (success.replace(/\"/g,'&quot;')) : '' %>"
+             data-error="<%= error ? (error.replace(/\"/g,'&quot;')) : '' %>"></div>
+      </div>
+    </section>
+
+    <aside class="card contact-info" aria-labelledby="reachUsTitle">
+      <div class="info-title" id="reachUsTitle">Reach us</div>
+      <div class="info-body">
+        <div class="contact-map">
+          <iframe
+            title="Office map"
+            src="https://www.google.com/maps?q=Butwal-16,+Rupandehi,+Lumbini+Province,+Nepal&output=embed"
+            loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+        <div class="info-row"><i class="fa-solid fa-envelope"></i> <a href="mailto:contact@jay.com">contact@jay.com</a></div>
+        <div class="info-row"><i class="fa-solid fa-phone"></i>   <a href="tel:9857021308">+977 9857021308</a></div>
+        <div class="info-row"><i class="fa-solid fa-location-dot"></i> <span>Lumbini Province, Butwal-16, Rupandehi, Nepal</span></div>
+        <div class="info-row"><i class="fa-solid fa-clock"></i>   <span>Mon–Fri: 9AM – 5PM</span></div>
+      </div>
+    </aside>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/contact-wizard.js" defer></script>
+  <script>
+    document.getElementById('openContact')?.addEventListener('click', function(){
+      const wrap = document.getElementById('contactWrap');
+      wrap.style.display = 'flex';
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    (function () {
+      const f = document.getElementById('contactForm');
+      const btn = document.getElementById('sendBtn');
+      if (!f || !btn) return;
+
+      f.addEventListener('submit', (e) => {
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const country = document.getElementById('country').value.trim();
+        const msg = document.getElementById('message').value.trim();
+        if (!name || !email || !country || !msg) {
+          e.preventDefault();
+          alert('Please fill name, email, country and message.');
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+      });
+    })();
+
+    (function () {
+      const el = document.getElementById('flash');
+      if (!el) return;
+      const ok  = el.getAttribute('data-success');
+      const err = el.getAttribute('data-error');
+      if (ok)      console.info(ok);
+      else if (err) console.warn(err);
+    })();
+  </script>
+</body>
+</html>

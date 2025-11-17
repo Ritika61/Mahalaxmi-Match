@@ -1,0 +1,47 @@
+{
+  "name": "matchindustry",
+  "version": "1.0.0",
+  "description": "MatchIndustry – Node + Express + EJS + MySQL (secure contact flow + admin).",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon ssrc/server.js",
+    "db:setup": "node scripts/db-setup.js",
+    "seed:admin": "node scripts/seed-admin-mysql.js \"admin@matchindustry.com\" \"StrongPass#2025\"",
+    "db:seed": "node scripts/seed-testimonial.js"
+
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "csurf": "^1.11.0",
+    "dompurify": "^3.3.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-mysql-session": "^3.0.3",
+    "express-rate-limit": "^8.1.0",
+    "express-session": "^1.18.2",
+    "express-slow-down": "^3.0.0",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "joi": "^18.0.1",
+    "jsdom": "24.1.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.15.3",
+    "nodemailer": "^7.0.10",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
+    "uuid": "^13.0.0",
+    "xss": "^1.0.15"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

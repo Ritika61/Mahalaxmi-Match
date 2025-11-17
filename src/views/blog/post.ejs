@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: (post?.title || 'Blog') }) %>
+  <meta name="description" content="<%= (post?.excerpt || post?.summary || 'Article') %>">
+  <style>
+    .post-hero{border-radius:14px;overflow:hidden;background:#000;max-height:460px}
+    .post-hero img{width:100%;height:100%;object-fit:cover;display:block}
+    .post-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 6px}
+    .post-meta .tag{padding:.25rem .6rem;border:1px solid var(--line,rgba(255,255,255,.15));border-radius:999px;font-size:.85rem}
+    .post-body img{max-width:100%;height:auto;border-radius:10px}
+    .post-body{line-height:1.75}
+
+    /* ── More-articles link palette (scoped) ───────────────────────── */
+    :root{
+      /* Tweak these three to your preference */
+      --related-link:    #a78bfa; /* normal   */
+      --related-hover:   #8b5cf6; /* hover    */
+      --related-visited: #c4b5fd; /* visited  */
+      --related-border:  rgba(167,139,250,.28);
+    }
+
+    /* Scope to the "More articles" section only */
+    .more-articles .card{ border-color: var(--related-border) !important; }
+    .more-articles h4{ margin:.25rem 0; }
+
+    .more-articles h4 a:link,
+    .more-articles h4 a:visited{
+      color: var(--related-link) !important;
+      text-decoration-color: color-mix(in srgb, var(--related-link) 60%, transparent);
+      text-underline-offset: 2px;
+      text-decoration-thickness: 2px;
+    }
+    .more-articles h4 a:hover,
+    .more-articles h4 a:focus-visible{
+      color: var(--related-hover) !important;
+      text-decoration-color: var(--related-hover) !important;
+      outline: 0;
+    }
+    .more-articles h4 a:visited{ color: var(--related-visited) !important; }
+
+    /* Optional: make the date a bit softer inside cards */
+    .more-articles .card .text-sub{ color: rgba(255,255,255,.72); }
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <main class="container section">
+    <a class="btn-outline" href="/blog">&larr; Back to blog</a>
+
+    <header style="margin:14px 0">
+      <h1 style="margin:6px 0"><%= post.title %></h1>
+      <div class="post-meta">
+        <% if (post.tag_name) { %><span class="tag"><%= post.tag_name %></span><% } %>
+        <span class="text-sub"><%= new Date(post.published_at || post.created_at).toLocaleDateString() %></span>
+        <% if (post.read_mins) { %><span class="text-sub">· <%= post.read_mins %> min read</span><% } %>
+      </div>
+    </header>
+
+    <% if (post.image) { %>
+      <div class="post-hero"><img src="<%= post.image %>" alt="<%= post.title %>" onerror="this.src='/img/blog-placeholder.jpg'"></div>
+    <% } %>
+
+    <article class="post-body section">
+      <!-- Rendered HTML body (sanitize on server before saving) -->
+      <%- post.html || `<p>${post.excerpt || post.summary || ''}</p>` %>
+    </article>
+
+    <!-- Share -->
+    <div class="card" style="padding:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <div class="text-sub">Share this article</div>
+      <div style="display:flex;gap:8px">
+        <a class="btn-outline" href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(canonical) %>" target="_blank" rel="noopener">Facebook</a>
+        <a class="btn-outline" href="https://www.linkedin.com/sharing/share-offsite/?url=<%= encodeURIComponent(canonical) %>" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+
+    <!-- More posts -->
+    <% if (Array.isArray(more) && more.length) { %>
+      <section class="section more-articles">
+        <h3>More articles</h3>
+        <ul class="cards" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;list-style:none;margin:0;padding:0">
+          <% more.forEach(p => { %>
+            <li class="card">
+              <a href="/blog/<%= p.slug %>" style="display:block;border-radius:12px;overflow:hidden;background:#000;margin:-18px -18px 12px -18px">
+                <img src="<%= p.image || '/img/blog-placeholder.jpg' %>" alt="<%= p.title %>" style="width:100%;height:170px;object-fit:cover" onerror="this.src='/img/blog-placeholder.jpg'">
+              </a>
+              <div class="card-body">
+                <div class="small text-sub"><%= new Date(p.published_at || p.created_at).toLocaleDateString() %></div>
+                <h4><a href="/blog/<%= p.slug %>"><%= p.title %></a></h4>
+                <p class="text-sub"><%= p.excerpt || p.summary || '' %></p>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </section>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

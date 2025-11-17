@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <%- include('../partials/head', { title: title || 'Messages' }) %>
+
+  <style>
+    /* ===== Admin table styles (dark) ===== */
+    :root{
+      --panel:#0f172a;
+      --line:rgba(148,163,184,.18);
+      --ink:#e6edf7;
+      --muted:#9fb0c6;
+      --accent:#79c3ff;
+      --row:rgba(255,255,255,.02);
+      --rowAlt:rgba(255,255,255,.04);
+      --hover:rgba(121,195,255,.08);
+      --shadow:0 18px 40px rgba(2,6,23,.35);
+      --radius:14px;
+    }
+    body{background:var(--bg);color:var(--ink)}
+
+    .section.container{max-width:1100px;margin:28px auto;padding:0 18px}
+    h1{margin:0 0 14px;font-weight:800;font-size:34px;letter-spacing:.2px}
+
+    /* Card panel wrapper for the table */
+    .table-wrap{
+      background:var(--panel);border:1px solid var(--line);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    /* Scroll on small screens */
+    .table-scroll{overflow:auto}
+    .table{
+      width:100%; border-collapse:separate; border-spacing:0; min-width:860px;
+    }
+
+    .table thead th{
+      text-align:left; font-weight:700; color:var(--ink);
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+      border-bottom:1px solid var(--line);
+      padding:14px 14px; position:sticky; top:0; z-index:1;
+    }
+
+    .table tbody td{
+      padding:12px 14px; color:var(--ink); border-bottom:1px solid var(--line);
+      vertical-align:top;
+    }
+
+    .table tbody tr:nth-child(odd)  { background:var(--row); }
+    .table tbody tr:nth-child(even) { background:var(--rowAlt); }
+    .table tbody tr:hover{ background:var(--hover); }
+
+    /* Cells */
+    .muted{color:var(--muted)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .truncate{
+      max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    /* Buttons (outline look) */
+    .btn-outline{
+      display:inline-block; padding:8px 12px; border-radius:10px;
+      border:1px solid var(--line); color:var(--ink); text-decoration:none;
+      background:transparent; cursor:pointer; transition:.15s ease;
+    }
+    .btn-outline:hover{ border-color:var(--accent); box-shadow:0 0 0 3px #79c3ff22; }
+    .btn-outline + .btn-outline{ margin-left:6px; }
+
+    /* Mail link */
+    a.mail{color:var(--accent); text-decoration:none; border-bottom:1px dashed transparent}
+    a.mail:hover{border-bottom-color:var(--accent)}
+
+    /* Compact on very small screens */
+    @media (max-width:700px){
+      .table{min-width:720px}
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active: 'messages', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <h1>Contact Messages</h1>
+
+    <% if (!items || items.length === 0) { %>
+      <p class="muted">No messages yet.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Country</th>
+                <th>Company</th>
+                <th>Preview</th>
+                <th style="width:160px">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach(m => { %>
+                <tr>
+                  <td class="mono"><%= new Date(m.created_at).toLocaleString() %></td>
+                  <td><%= m.name %></td>
+                  <td><a class="mail" href="mailto:<%= m.email %>"><%= m.email %></a></td>
+                  <td class="muted"><%= m.country || '-' %></td>
+                  <td class="muted"><%= m.company || '-' %></td>
+                  <td class="truncate" title="<%- m.preview %>"><%- m.preview %></td>
+                  <td>
+                    <a class="btn-outline" href="/admin/messages/<%= m.id %>">View</a>
+                    <form action="/admin/messages/<%= m.id %>/delete"
+                          method="POST" style="display:inline"
+                          onsubmit="return confirm('Delete this message?')">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button class="btn-outline" type="submit">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+  </main>
+
+</body>
+</html>

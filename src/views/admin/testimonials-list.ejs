@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: (title || 'Testimonials') }) %>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active: 'testimonials', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap">
+      <h1 style="margin:0">Testimonials</h1>
+
+      <!-- FILTER (GET) -->
+      <form id="filterForm" method="get" action="/admin/testimonials" style="display:flex;gap:8px;align-items:center">
+        <label for="filter">Filter</label>
+        <select id="filter" name="filter" onchange="this.form.submit()">
+          <option value="all"      <%= (filter === 'all') ? 'selected' : '' %>>All</option>
+          <option value="pending"  <%= (filter === 'pending') ? 'selected' : '' %>>Pending</option>
+          <option value="approved" <%= (filter === 'approved') ? 'selected' : '' %>>Approved</option>
+        </select>
+        <noscript><button class="btn-outline" type="submit">Apply</button></noscript>
+      </form>
+    </div>
+
+    <% if (!items || items.length === 0) { %>
+      <div class="card" style="padding:16px;margin-top:16px">No testimonials found.</div>
+    <% } else { %>
+      <div style="overflow:auto;margin-top:16px">
+        <table class="data" style="min-width:900px">
+          <thead>
+            <tr>
+              <th style="width:64px">ID</th>
+              <th>Name</th>
+              <th style="width:90px">Rating</th>
+              <th>Message</th>
+              <th style="width:120px">Approved</th>
+              <th style="width:200px">Created</th>
+              <th style="width:280px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(t => { %>
+              <tr>
+                <td><%= t.id %></td>
+                <td><strong><%= t.name %></strong></td>
+                <td><%= Number(t.rating) || 0 %>/5</td>
+                <td style="max-width:420px;white-space:normal"><%= t.message %></td>
+                <td><%= t.approved ? 'Yes' : 'No' %></td>
+                <td><%= new Date(t.created_at).toLocaleString() %></td>
+                <td>
+                  <!-- Preserve current filter in query string -->
+                  <% if (!t.approved) { %>
+                    <form action="/admin/testimonials/<%= t.id %>/approve?filter=<%= encodeURIComponent(filter) %>"
+                          method="POST" style="display:inline">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button class="btn" type="submit">Approve</button>
+                    </form>
+                  <% } %>
+
+                  <% if (t.approved) { %>
+                    <form action="/admin/testimonials/<%= t.id %>/unapprove?filter=<%= encodeURIComponent(filter) %>"
+                          method="POST" style="display:inline">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button class="btn-outline" type="submit">Unapprove</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

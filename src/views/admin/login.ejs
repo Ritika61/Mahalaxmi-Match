@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: title || 'Admin Login' }) %>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous"/>
+
+  <style>
+    /* ---------- PAGE LAYOUT ---------- */
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      min-height:100vh; min-height:100dvh;  /* make sure it fills at first paint */
+      display:grid; place-items:center;
+      color:#e8eeff;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans";
+      background:#0b1327; /* fallback */
+      overflow:hidden; isolation:isolate;
+    }
+
+    /* ---------- BACKGROUND (radial glow + dual grid + subtle beams) ---------- */
+    .bg-gradient{
+      position:fixed; inset:0; z-index:0;
+      background:
+        radial-gradient(1200px 800px at 18% -5%, #15254c 0%, #0f1a36 48%, #0b1327 100%);
+    }
+    .bg-gradient::before{
+      content:""; position:absolute; inset:0; pointer-events:none; opacity:.35;
+      background:
+        linear-gradient(to right, rgba(140,168,230,.10) 1px, transparent 1px) 0 0/36px 36px,
+        linear-gradient(to bottom, rgba(140,168,230,.10) 1px, transparent 1px) 0 0/36px 36px,
+        linear-gradient(to right, rgba(120,150,220,.08) 1px, transparent 1px) 0 0/144px 144px,
+        linear-gradient(to bottom, rgba(120,150,220,.08) 1px, transparent 1px) 0 0/144px 144px;
+    }
+    .bg-gradient::after{
+      content:""; position:absolute; inset:-10%; pointer-events:none; opacity:.18;
+      background:
+        radial-gradient(120% 120% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.28) 100%),
+        repeating-linear-gradient(-18deg, rgba(170,200,255,.06) 0 1px, transparent 1px 16px);
+      mask: radial-gradient(90% 90% at 50% 42%, #000 70%, transparent 100%);
+      animation: beams 10s linear infinite;
+    }
+    @keyframes beams{
+      0%{transform:translateX(-1%) rotate(-.4deg)}
+      50%{transform:translateX( 1%) rotate( .4deg)}
+      100%{transform:translateX(-1%) rotate(-.4deg)}
+    }
+
+    /* Canvases MUST have CSS size so they render full-screen before JS runs */
+    #bgBlobs, #bgLinks{
+      position:fixed; inset:0; z-index:1; pointer-events:none;
+      width:100vw; height:100vh;
+      display:block;
+    }
+    #bgLinks{ z-index:2; }
+
+    /* ---------- CARD ---------- */
+    .login-wrap{ width:min(520px, 94vw); padding:18px; z-index:3; }
+    .login-card{
+      background: linear-gradient(180deg, rgba(26,39,68,.92), rgba(18,28,52,.90));
+      border: 1px solid rgba(95,123,180,.35);
+      border-radius: 16px;
+      padding: 28px 26px 22px;
+      box-shadow: 0 16px 44px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
+    .login-card h1{
+      margin:0 0 8px; font-size: clamp(22px, 3.6vw, 28px);
+      display:flex; align-items:center; gap:10px; color:#f4f7ff;
+    }
+    .subtitle{ margin:0 0 18px; color:#aab6d6; font-size:14px; }
+
+    .error{
+      color:#ffd8d8; background:rgba(255,88,88,.10);
+      border:1px solid rgba(255,88,88,.35);
+      padding:10px 12px; border-radius:10px; margin:0 0 14px; font-weight:600;
+    }
+
+    label{ display:block; margin:10px 0 6px; font-size:14px; color:#cfd9ff; }
+    .field{ position:relative; }
+    input[type="email"], input[type="password"]{
+      width:100%; padding:12px 14px; border:1px solid rgba(121,146,210,.28);
+      background:#0b1327; color:#e6edff; border-radius:10px; font-size:15px; outline:none;
+      transition:border-color .25s, box-shadow .25s, background-color .25s;
+    }
+    input:focus{ background:#0a1130; border-color:#88a3ff; box-shadow:0 0 0 4px rgba(136,163,255,.18); }
+    input::placeholder{ color:#93a6d5; }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus{
+      -webkit-text-fill-color:#e6edff;
+      -webkit-box-shadow:0 0 0 1000px #0b1327 inset;
+      transition:background-color 5000s ease-in-out 0s; caret-color:#e6edff;
+    }
+
+    .toggle-pass{
+      position:absolute; right:12px; top:50%; transform:translateY(-50%);
+      color:#9fb0dc; cursor:pointer; padding:6px;
+    }
+    .toggle-pass:hover{ color:#d2dbff; }
+
+    .actions{ margin-top:14px; }
+    .btn{
+      width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:12px 16px; border:0; border-radius:10px; cursor:pointer;
+      background: linear-gradient(90deg, #6f87ff, #8aa6ff);
+      color:#0b1022; font-weight:800; font-size:16px;
+      box-shadow:0 12px 26px rgba(111,135,255,.35);
+      transition: transform .06s, filter .2s, box-shadow .2s;
+    }
+    .btn:hover{ filter:brightness(1.04); }
+    .btn:active{ transform:translateY(1px); }
+
+    .note{ margin-top:12px; text-align:center; font-size:12px; color:#92a4da; }
+  </style>
+</head>
+<body>
+  <!-- Background layers -->
+  <div class="bg-gradient" aria-hidden="true"></div>
+  <canvas id="bgBlobs"></canvas>
+  <canvas id="bgLinks"></canvas>
+
+  <!-- PRIME THE CANVASES **IMMEDIATELY** SO FIRST FRAME IS FULL-SCREEN -->
+  <script nonce="<%= cspNonce || '' %>">
+    (function prime() {
+      var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      var W = window.innerWidth, H = window.innerHeight;
+      var a = document.getElementById('bgBlobs');
+      var b = document.getElementById('bgLinks');
+      if (a){ a.width = Math.floor(W*dpr); a.height = Math.floor(H*dpr); }
+      if (b){ b.width = Math.floor(W*dpr); b.height = Math.floor(H*dpr); }
+    })();
+  </script>
+
+  <!-- Card -->
+  <div class="login-wrap">
+    <main class="login-card">
+      <h1><i class="fa-solid fa-user-lock"></i> Admin Login</h1>
+      <p class="subtitle">Sign in with your admin email and password.</p>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <p class="error"><%- error %></p>
+      <% } %>
+
+      <form method="post" action="/admin/login" autocomplete="on">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" required autocomplete="username" placeholder="">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="">
+          <span class="toggle-pass" title="Show/Hide password" onclick="(function(){
+            const i=document.getElementById('password');
+            const show = i.type==='password';
+            i.type = show ? 'text' : 'password';
+          })()"></span>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="submit"><i class="fas fa-right-to-bracket"></i> Sign in</button>
+        </div>
+      </form>
+
+      <p class="note">🔒 For your security, admin access is monitored. Do not share credentials.</p>
+    </main>
+  </div>
+
+  <!-- ---------- BLOBS (closer & a bit faster) ---------- -->
+  <script nonce="<%= cspNonce || '' %>">
+    (function(){
+      const c = document.getElementById('bgBlobs');
+      const ctx = c.getContext('2d');
+      let w, h, dpr, blobs, t = 0;
+
+      function resize(){
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = window.innerWidth; h = window.innerHeight;
+        c.width = Math.floor(w * dpr); c.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        init();
+      }
+
+      function init(){
+        const R = Math.max(w, h) * 0.28;
+        blobs = [
+          { ax:w*0.50, ay:h*0.48, r:R*0.75, hue:215, a:0.12, vx: 0.10, vy: 0.06, wob:0.9 },
+          { ax:w*0.56, ay:h*0.44, r:R*0.60, hue:200, a:0.10, vx:-0.08, vy: 0.08, wob:0.8 },
+          { ax:w*0.44, ay:h*0.56, r:R*0.55, hue:225, a:0.10, vx: 0.07, vy:-0.07, wob:1.0 },
+        ].map(b => ({ ...b, x:b.ax, y:b.ay }));
+      }
+
+      function loop(){
+        ctx.clearRect(0,0,w,h);
+        t += 0.02;
+
+        for(const b of blobs){
+          b.x += (b.ax - b.x)*0.03 + b.vx + Math.sin(t*b.wob)*0.18;
+          b.y += (b.ay - b.y)*0.03 + b.vy + Math.cos(t*b.wob)*0.18;
+
+          const grad = ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+          grad.addColorStop(0, `hsla(${b.hue}, 85%, 72%, ${b.a})`);
+          grad.addColorStop(1, `hsla(${b.hue}, 85%, 72%, 0)`);
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.fillStyle = grad;
+          ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener('resize', resize, {passive:true});
+      window.addEventListener('load', () => { resize(); requestAnimationFrame(loop); });
+    })();
+  </script>
+
+  <!-- ---------- NODES + LINKS (expanded, lively) ---------- -->
+  <script nonce="<%= cspNonce || '' %>">
+    (function(){
+      const canvas = document.getElementById('bgLinks');
+      const ctx = canvas.getContext('2d');
+      let w, h, dpr, nodes = [];
+
+      const CFG = {
+        maxDist: 150,
+        nodeSize: 2.6,
+        nodeGlow: 3.8,
+        lineAlpha: 0.22,
+        nodeAlpha: 0.96,
+        speed: 0.14
+      };
+
+      function resize(){
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = window.innerWidth; h = window.innerHeight;
+        canvas.width = Math.floor(w * dpr); canvas.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        seed();
+      }
+
+      function addCluster(cx, cy, count, spread){
+        for(let i=0;i<count;i++){
+          const a = Math.random()*Math.PI*2;
+          const r = (Math.random()*0.6+0.4) * spread;
+          nodes.push({
+            x: cx + Math.cos(a)*r,
+            y: cy + Math.sin(a)*r,
+            vx: (Math.random()*2-1)*CFG.speed,
+            vy: (Math.random()*2-1)*CFG.speed,
+            z: 0.6 + Math.random()*0.8
+          });
+        }
+      }
+
+      function seed(){
+        nodes = [];
+        /* distribute clusters so both sides feel “full” like your 2nd image */
+        addCluster(w*0.72, h*0.38, 14, 88);
+        addCluster(w*0.30, h*0.62, 12, 84);
+        addCluster(w*0.44, h*0.48,  8, 60);
+        addCluster(w*0.35, h*0.28,  5, 40);
+      }
+
+      function draw(){
+        ctx.clearRect(0,0,w,h);
+
+        const g = ctx.createRadialGradient(w*0.60, h*0.42, 0, w*0.60, h*0.42, Math.max(w,h)*0.9);
+        g.addColorStop(0,'rgba(120,185,255,.07)');
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+
+        for(const p of nodes){
+          p.x += p.vx*(0.8+p.z);
+          p.y += p.vy*(0.8+p.z);
+          if(p.x<-20) p.x = w+20; if(p.x>w+20) p.x = -20;
+          if(p.y<-20) p.y = h+20; if(p.y>h+20) p.y = -20;
+        }
+
+        for(let i=0;i<nodes.length;i++){
+          const a = nodes[i];
+          for(let j=i+1;j<nodes.length;j++){
+            const b = nodes[j];
+            const dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+            if(d<CFG.maxDist){
+              const t = 1 - d/CFG.maxDist;
+              ctx.strokeStyle = `rgba(140,170,230,${CFG.lineAlpha*t})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+            }
+          }
+        }
+
+        for(const p of nodes){
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(200,220,255,${CFG.nodeAlpha})`;
+          ctx.arc(p.x,p.y,CFG.nodeSize*p.z,0,Math.PI*2); ctx.fill();
+
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(120, 180, 255, .22)';
+          ctx.arc(p.x,p.y,CFG.nodeSize*p.z*CFG.nodeGlow,0,Math.PI*2); ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize, {passive:true});
+      window.addEventListener('load', () => { resize(); requestAnimationFrame(draw); });
+    })();
+  </script>
+</body>
+</html>

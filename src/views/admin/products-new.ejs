@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: (title || 'Add Product') }) %>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active: 'products', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <h1>Add product</h1>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="error"><%- error %></div>
+    <% } %>
+
+    <form action="/admin/products/new" method="POST" enctype="multipart/form-data" class="contact">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="grid">
+        <div>
+          <label>Name</label>
+          <input name="name" required>
+        </div>
+        <div>
+          <label>Slug</label>
+          <input name="slug" placeholder="lowercase-hyphen-slug" required>
+        </div>
+        <div>
+          <label>Category</label>
+          <input name="category" required>
+        </div>
+        <div>
+          <label>Active</label>
+          <select name="active">
+            <option value="1" selected>Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Short description</label>
+      <input name="short_desc" required>
+
+      <label>Description</label>
+      <textarea name="description"></textarea>
+
+      <label>Specs (JSON or key:value per line)</label>
+      <textarea name="specs" placeholder='{"size":"large","color":"red"} or
+weight: 200g
+box: 50 sticks'></textarea>
+
+      <label>Image</label>
+      <input type="file" name="image" accept="image/*">
+
+      <div class="actions">
+        <button class="btn" type="submit">Add Product</button>
+        <a class="btn-outline" href="/admin/products">Cancel</a>
+      </div>
+    </form>
+  </main>
+
+</body>
+</html>

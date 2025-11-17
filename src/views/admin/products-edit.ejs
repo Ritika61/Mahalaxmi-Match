@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: (title || 'Edit Product') }) %>
+  <style>
+    .preview{
+      width:100%;
+      max-width:420px;
+      aspect-ratio:16/9;
+      object-fit:cover;
+      border-radius:12px;
+      border:1px solid var(--line,rgba(255,255,255,.18));
+      display:none
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active: 'products', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px">
+      <h1 style="margin:0">Edit product</h1>
+      <a class="btn-outline" href="/admin/products">Back</a>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="card" style="padding:12px;color:#fca5a5;border:1px solid rgba(255,0,0,.35);margin-bottom:10px"><%- error %></div>
+    <% } %>
+
+    <!-- EDIT FORM (only one form) -->
+    <form action="/admin/products/<%= item.id %>/edit" method="POST" enctype="multipart/form-data" class="contact">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="grid">
+        <div>
+          <label>Name</label>
+          <input name="name" required value="<%= item.name %>">
+        </div>
+        <div>
+          <label>Slug</label>
+          <input name="slug" placeholder="lowercase-hyphen-slug" required value="<%= item.slug %>">
+        </div>
+        <div>
+          <label>Category</label>
+          <input name="category" required value="<%= item.category %>">
+        </div>
+        <div>
+          <label>Active</label>
+          <select name="active">
+            <option value="1" <%= item.active ? 'selected' : '' %>>Yes</option>
+            <option value="0" <%= !item.active ? 'selected' : '' %>>No</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Short description</label>
+      <input name="short_desc" required value="<%= item.short_desc || '' %>">
+
+      <label>Description</label>
+      <textarea name="description" rows="6"><%= item.description || '' %></textarea>
+
+      <label>Specs (JSON or key:value per line)</label>
+      <textarea name="specs" rows="6" placeholder='{"size":"large","color":"red"} or
+weight: 200g
+box: 50 sticks'><%= (item.specs_text || item.specs || '') %></textarea>
+
+      <div class="grid">
+        <div>
+          <label>Replace Image (optional)</label>
+          <input id="image" type="file" name="image" accept="image/*">
+          <img id="preview" class="preview" alt="Preview">
+          <div class="small text-sub" style="margin-top:6px">
+            Current:
+            <code><%= item.image || '/img/product-placeholder.jpg' %></code>
+          </div>
+          <div style="margin-top:6px">
+            <img src="<%= item.image || '/img/product-placeholder.jpg' %>"
+                 alt="Current image"
+                 style="width:180px;height:110px;object-fit:cover;border-radius:8px"
+                 onerror="this.onerror=null;this.src='/img/product-placeholder.jpg'">
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn" type="submit">Save changes</button>
+        <a class="btn-outline" href="/admin/products">Cancel</a>
+      </div>
+    </form>
+
+    <!-- DELETE FORM (separate, its own token) -->
+    <form action="/admin/products/<%= item.id %>/delete" method="POST"
+          onsubmit="return confirm('Delete this product?')" style="margin-top:12px">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn-outline" type="submit">Delete product</button>
+    </form>
+  </main>
+
+  <script>
+    (function(){
+      const input = document.getElementById('image');
+      const prev  = document.getElementById('preview');
+      if (!input) return;
+      input.addEventListener('change', () => {
+        const f = input.files && input.files[0];
+        if (!f) { prev.src=''; prev.style.display='none'; return; }
+        const url = URL.createObjectURL(f);
+        prev.src = url;
+        prev.style.display = 'block';
+        prev.onload = () => URL.revokeObjectURL(url);
+      });
+    })();
+  </script>
+
+</body>
+</html>

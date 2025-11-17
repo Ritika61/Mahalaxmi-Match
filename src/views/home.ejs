@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partials/head', { title: 'Jay Mahalaxmi Ind. Pvt. Ltd' }) %>
+
+    <!-- Font Awesome (stars + chevrons) -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <style>
+      /* ===================== PAGE-SCOPED VARIABLES ===================== */
+      :root{
+        --page-container-max: 1440px;
+        --page-container-gutter: 16px;
+        --hero-edge-inset: 92px; /* ↑ more inset = moves right */
+      }
+      @media (min-width: 1600px){
+        :root{ --page-container-gutter: 24px; }
+      }
+
+      /* ===================== PAGE-SCOPED LAYOUT (NO NAVBAR IMPACT) ===================== */
+      .page-container{
+        max-width: var(--page-container-max);
+        margin: 0 auto;
+        padding: 0 var(--page-container-gutter);
+      }
+      .page-section{ padding: 48px 0; }
+
+      /* Testimonials wrapper width matches page container */
+      .twrap{ max-width: var(--page-container-max); margin: 0 auto; padding: 0 var(--page-container-gutter); }
+
+      /* ---------- General fixes so nothing blocks clicks ---------- */
+      .hero__overlay { pointer-events: none !important; z-index: 0; }
+      .testi-arc { position: relative; z-index: 50 !important; }
+      .arc       { position: relative; z-index: 51 !important; }
+
+      /* ===================== HERO (SCOPED) ===================== */
+      .hero{ position: relative; isolation: isolate; }
+      .hero--video{ min-height: 56vh; display: grid; align-items: center; }
+      .hero__media{ position: absolute; inset: 0; overflow: hidden; }
+      .hero__video{ width: 100%; height: 100%; object-fit: cover; }
+
+      /* Keep hero text readable width */
+      .hero__inner{ will-change: transform; max-width: 720px; }
+      .hero__inner h1{ margin: 0 0 8px; }
+      .hero__inner p{ margin: 0 0 16px; }
+      .cta{ display: flex; gap: 10px; flex-wrap: wrap; }
+
+      /* >>> Shift hero text left into the exact area you marked (desktop only) */
+      @media (min-width: 1200px){
+        .hero--video .hero__inner{
+          margin: 0;
+          transform: translateX(
+            calc(-1 * ((100vw - var(--page-container-max)) / 2 + var(--page-container-gutter) - var(--hero-edge-inset)))
+          );
+        }
+      }
+
+      /* ===================== SHORT DESCRIPTION (SCOPED) ===================== */
+      .intro-blurb{ padding: 28px 0 12px; }
+      .intro-blurb .lead{
+        max-width: 980px;
+        color:#cfd8e3;
+        font-size: clamp(16px, 2.2vw, 20px);
+        line-height: 1.6;
+      }
+      .intro-bullets{
+        margin:12px 0 0;
+        padding-left: 1.1rem;
+        max-width: 980px;
+        color:#aebad0;
+      }
+      .intro-bullets li{ margin: 4px 0; }
+
+      /* ===================== FEATURES GRID (SCOPED) ===================== */
+      .features__grid{ list-style:none; display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); padding:0; margin:0; }
+      .features__grid .card{ border-radius:12px; padding:18px; border:1px solid rgba(148,163,184,.15); background:rgba(15,23,42,.35); }
+
+      /* ===================== TESTIMONIALS (SCOPED) ===================== */
+      .testi-arc{
+        background:#0f172a;
+        padding:90px 0 100px;
+      }
+      .t-head{text-align:center;margin-bottom:26px}
+      .t-head .eyeb{color:#8ea0b8;letter-spacing:.06em;font-size:14px}
+      .t-head h2{margin:6px 0 0;font-size:clamp(28px,4.6vw,40px);color:#e6edf7}
+      .t-head p{margin:4px 0 0;color:#cfd8e3;font-style:italic;font-family:"Times New Roman",serif;font-size:clamp(20px,4vw,32px)}
+
+      .arc{height:460px;filter:drop-shadow(0 28px 84px rgba(3,7,18,.12))}
+      @media (max-width:900px){ .arc{height:520px} }
+
+      .tcardA{
+        position:absolute; left:50%; top:50%;
+        width:min(640px,84vw); min-height:260px;
+        border-radius:28px;
+        background:linear-gradient(180deg,#162236 0%, #111c2d 100%);
+        border:1px solid rgba(148,163,184,.15);
+        padding:30px 32px; text-align:center;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+        box-shadow:0 18px 48px rgba(2,6,23,.45), inset 0 1px 0 rgba(255,255,255,.04);
+        transition:transform .65s cubic-bezier(.22,.61,.36,1),opacity .45s ease,filter .35s ease;
+        will-change:transform,opacity,filter;
+        z-index:5;
+      }
+      .tA-name{font-family:'Times New Roman',serif;font-size:28px;color:#e6edf7}
+      .tA-stars{color:#f5b041;letter-spacing:2px;filter:drop-shadow(0 0 6px rgba(245,176,65,.25))}
+      .tA-quote{font-size:clamp(18px,2.8vw,28px);line-height:1.35;color:#d3deea;margin:6px auto 0;max-width:560px}
+      .tA-date{font-size:12px;color:#8ea0b8}
+
+      /* Positions */
+      .pos-center{z-index:7;transform:translate(-50%,-52%) scale(1) rotate(0deg)}
+      .pos-left  {z-index:6;transform:translate(calc(-50% - 24%),-38%) scale(.94) rotate(-10deg)}
+      .pos-right {z-index:6;transform:translate(calc(-50% + 24%),-38%) scale(.94) rotate(10deg)}
+      .pos-backL {z-index:5;transform:translate(calc(-50% - 44%),-24%) scale(.88) rotate(-14deg);opacity:.9}
+      .pos-backR {z-index:5;transform:translate(calc(-50% + 44%),-24%) scale(.88) rotate(14deg);opacity:.9}
+      .pos-queue{z-index:1;transform:translate(-50%,-10%) scale(.75);opacity:0}
+
+      /* Controls */
+      .arc-nav { position:absolute; inset:0; pointer-events:auto !important; z-index:10000 !important; }
+      .arc-btn{
+        position:absolute; top:50%; transform:translateY(-50%);
+        width:56px; height:56px; border-radius:50%; border:0; cursor:pointer;
+        background:#ffffff; color:#0b1220;
+        box-shadow:0 18px 36px rgba(2,6,23,.35);
+        display:grid; place-items:center;
+        z-index:10001;
+      }
+      .arc-btn:hover{filter:brightness(.97)}
+      .arc-prev{left:-6px}
+      .arc-next{right:-6px}
+
+      .arc-dots{display:flex;justify-content:center;gap:8px;margin-top:22px}
+      .arc-dots .dot{width:8px;height:8px;border-radius:50%;background:#5b6c86}
+      .arc-dots .dot.active{background:#7fb1ff}
+    </style>
+  </head>
+  <body>
+    <!-- Navbar stays untouched -->
+    <%- include('partials/header') %>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero hero--video">
+      <div class="hero__media" aria-hidden="true">
+        <video class="hero__video" autoplay muted loop playsinline preload="metadata">
+          <source src="/img/fire.mp4" type="video/mp4" />
+        </video>
+        <div class="hero__overlay"></div>
+      </div>
+
+      <!-- Use page-container, not .container (so nav CSS is not affected) -->
+      <div class="page-container hero__inner hero__inner--left">
+        <h1>Reliable matches &amp; fire starters</h1>
+        <p>Quality you can trust, produced sustainably and delivered worldwide.</p>
+        <div class="cta">
+          <a class="btn" href="/contact">Get in touch</a>
+          <a class="btn-outline" href="/products">See products</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SHORT DESCRIPTION ===================== -->
+    <section class="intro-blurb">
+      <div class="page-container">
+        <p class="lead">
+          <br>
+          We manufacture and export safety matches, wood-wool fire starters, fire cubes, and
+          low-smoke lighters for retail, hospitality, and outdoor brands. Our products are
+          engineered for quick ignition, clean burn, and dependable supply supported by tight
+          quality control and private-label options.
+        </p>
+        <ul class="intro-bullets">
+          <li>Consistent burn times with low odor and minimal residue</li>
+          <li>Retail-ready packaging and bulk/private-label programs</li>
+          <li>Reliable lead times and export-grade packing</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUCT FEATURE CARDS ===================== -->
+    <section class="page-section">
+      <div class="page-container">
+        <ul class="cards features__grid">
+          <li class="card">
+            <h3>Wood wool</h3>
+            <p class="text-sub">
+              Natural pine shavings infused with clean wax. Catches in seconds even with damp kindling
+              and builds a stable flame for stoves, grills, and campfires.
+            </p>
+            <ul>
+              <br>
+              <li>Typical burn: <strong>8–10 minutes</strong> per piece</li>
+              <li>Low-odor, food-friendly ignition (great for BBQs)</li>
+              <li>Composition: kiln-dried softwood + refined wax</li>
+              <li>Packs: <em>32 / 50 / 100</em> pieces (private label available)</li>
+            </ul>
+          </li>
+
+          <li class="card">
+            <h3>Fire cubes</h3>
+            <p class="text-sub">
+              Dense fuel cubes for consistent, even heat. No flare-ups, no kerosene smell—just a steady
+              flame that makes lighting charcoal and logs effortless.
+            </p>
+            <ul>
+              <br>
+              <li>Typical burn: <strong>9–12 minutes</strong> per cube</li>
+              <li>Clean paraffin/vegetable-wax blend; low residue</li>
+              <li>Individually portioned for quick, mess-free use</li>
+              <li>Packs: <em>24 / 48 / 96</em> cubes (export-ready cartons)</li>
+            </ul>
+          </li>
+
+          <li class="card">
+            <h3>Matches</h3>
+            <p class="text-sub">
+              Smooth-striking safety matches with moisture-resistant splints. Made for everyday kitchens,
+              hotels, and outdoor kits with tight quality control and low breakage.
+            </p>
+            <ul>
+              <br>
+              <li>Heads: safety formulation for reliable ignition</li>
+              <li>Splints: treated softwood for <strong>clean, steady</strong> burn</li>
+              <li>Variants: kitchen, extra-long, camping/water-resistant</li>
+              <li>Boxes: <em>40 / 60</em> sticks; custom print & barcodes supported</li>
+            </ul>
+          </li>
+
+          <li class="card">
+            <h3>Fire lighters</h3>
+            <p class="text-sub">
+              Compressed wood-fiber briquettes with refined wax for a long, controlled flame. Ideal for
+              fireplaces and grills—low smoke, low odor, and easy to handle.
+            </p>
+            <ul>
+              <br>
+              <li>Typical burn: <strong>12–18 minutes</strong> per briquette</li>
+              <li>Clean ignition: no liquid fuels, minimal soot</li>
+              <li>Works with hardwood logs & charcoal</li>
+              <li>Packs: <em>6 / 12 / 24</em> pieces; shelf-ready trays</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== TESTIMONIALS ===================== -->
+    <%
+      const baseList =
+        (typeof testimonials  !== 'undefined' && Array.isArray(testimonials))  ? testimonials  :
+        (typeof homeFeedbacks !== 'undefined' && Array.isArray(homeFeedbacks)) ? homeFeedbacks :
+        [];
+      let tlist = baseList.slice(0);
+      if (tlist.length >= 2 && tlist.length < 5) {
+        for (let k = tlist.length; k < 5; k++) tlist.push(baseList[k % baseList.length]);
+      }
+      const n = tlist.length;
+      const i0 = 0;
+      const L2 = (i0 - 2 + n) % n, L1 = (i0 - 1 + n) % n, C = i0, R1 = (i0 + 1) % n, R2 = (i0 + 2) % n;
+    %>
+
+    <section class="testi-arc">
+      <div class="twrap">
+        <div class="t-head">
+          <div class="eyeb">Customer Feedback</div>
+          <h2>What our clients say</h2>
+          <p>after working with Jay Mahalaxmi Ind. Pvt. Ltd.</p>
+        </div>
+
+        <% if (tlist.length) { %>
+          <div class="arc" id="arcCarousel" tabindex="0" aria-label="Testimonials carousel">
+            <% tlist.forEach((fb, idx) => {
+                 const r = Math.max(1, Math.min(5, Number(fb.rating)||5));
+                 const pos =
+                   (idx === C)  ? 'pos-center' :
+                   (idx === L1) ? 'pos-left'  :
+                   (idx === R1) ? 'pos-right' :
+                   (idx === L2) ? 'pos-backL' :
+                   (idx === R2) ? 'pos-backR' : 'pos-queue';
+            %>
+              <article class="tcardA <%= pos %>" data-i="<%= idx %>">
+                <div class="tA-name"><%= fb.name || 'Guest' %></div>
+                <div class="tA-stars" aria-label="<%= r %> stars">
+                  <% for (let s=0; s<r; s++){ %><i class="fa-solid fa-star"></i><% } %>
+                  <% for (let s=r; s<5; s++){ %><i class="fa-regular fa-star"></i><% } %>
+                </div>
+                <blockquote class="tA-quote">"<%= fb.message || fb.comment || '' %>"</blockquote>
+                <% if (fb.created_at) { %>
+                  <div class="tA-date"><%= new Date(fb.created_at).toLocaleDateString() %></div>
+                <% } %>
+              </article>
+            <% }) %>
+
+            <div class="arc-nav">
+              <button type="button" id="arcPrev" class="arc-btn arc-prev" aria-label="Previous">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button type="button" id="arcNext" class="arc-btn arc-next" aria-label="Next">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="arc-dots" id="arcDots"></div>
+        <% } else { %>
+          <p style="text-align:center;max-width:720px;margin:0 auto;color:#cfd8e3">
+            No feedback yet. Be the first to share your experience — <a href="/testimonials">write feedback</a>.
+          </p>
+        <% } %>
+      </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+    <!-- Existing site scripts -->
+    <script src="/js/site.js" defer></script>
+    <script src="/js/contact-wizard.js" defer></script>
+
+    <!-- Testimonials carousel JS (external, CSP-safe) -->
+    <script src="/js/testimonials-carousel.js" defer></script>
+  </body>
+</html>

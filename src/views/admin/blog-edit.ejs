@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: (title || 'Edit Post') }) %></head>
+<body>
+  <%- include('../partials/adminheader', { active: 'blog', csrfToken: csrfToken }) %>
+  <main class="section container">
+    <h1>Edit Post</h1>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="card" style="padding:12px;color:#fca5a5;border:1px solid rgba(255,0,0,.35)"> <%- error %> </div>
+    <% } %>
+
+    <form class="contact" action="/admin/blog/<%= item.id %>/edit" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <label>Title</label>
+      <input name="title" required value="<%= item.title %>">
+
+      <label>Slug</label>
+      <input name="slug" required value="<%= item.slug %>">
+
+      <label>Excerpt</label>
+      <textarea name="excerpt" rows="2"><%= item.excerpt || '' %></textarea>
+
+      <label>HTML Body</label>
+      <textarea name="html" rows="10"><%= item.html || '' %></textarea>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label>Tag slug</label>
+          <input name="tag_slug" value="<%= item.tag_slug || '' %>">
+        </div>
+        <div>
+          <label>Tag name</label>
+          <input name="tag_name" value="<%= item.tag_name || '' %>">
+        </div>
+      </div>
+
+      <label>Read minutes</label>
+      <input type="number" min="1" max="60" name="read_mins" value="<%= item.read_mins || '' %>">
+
+      <% if (item.image) { %>
+        <div class="small text-sub">Current image:</div>
+        <img src="<%= item.image %>" alt="" style="max-width:320px;border-radius:10px">
+      <% } %>
+
+      <label>Replace image</label>
+      <input type="file" name="image" accept="image/*">
+
+      <div class="small text-sub" style="margin-top:8px">
+        Status: <%= item.published_at ? ('Published ' + new Date(item.published_at).toLocaleString()) : 'Draft' %>
+      </div>
+
+      <button class="btn" type="submit">Save changes</button>
+    </form>
+  </main>
+</body>
+</html>

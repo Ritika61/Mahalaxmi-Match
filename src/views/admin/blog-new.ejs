@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: (title || 'New Post') }) %>
+  <style>
+    .form-grid{display:grid;gap:12px}
+    .form-2{grid-template-columns:1fr 1fr}
+    @media (max-width:900px){.form-2{grid-template-columns:1fr}}
+    .hint{opacity:.8;font-size:.9rem}
+    .count{opacity:.7;font-size:.85rem;margin-left:auto}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .preview{width:100%;max-width:420px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:1px solid var(--line,rgba(255,255,255,.18));display:none}
+    .field{display:grid;gap:6px}
+    .stack{display:grid;gap:6px}
+    .card.note{padding:10px;border:1px dashed var(--line,rgba(255,255,255,.2))}
+  </style>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active: 'blog', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <% /* SAFE FALLBACK so undefined 'data' never explodes */ %>
+    <% const d = (typeof data !== 'undefined' && data) ? data : {}; %>
+
+    <div class="row" style="justify-content:space-between">
+      <h1 style="margin:0">New Post</h1>
+      <a class="btn-outline" href="/admin/blog">Back to list</a>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="card" style="padding:12px;color:#fca5a5;border:1px solid rgba(255,0,0,.35);margin-top:12px">
+        <%- error %>
+      </div>
+    <% } %>
+
+    <form class="contact" action="/admin/blog/new" method="post" enctype="multipart/form-data" style="margin-top:12px">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <!-- Title + slug -->
+      <div class="form-grid">
+        <div class="field">
+          <label>Title</label>
+          <input id="title" name="title" required
+                 value="<%= d.title || '' %>"
+                 placeholder="Write a compelling title">
+          <div class="row">
+            <span class="hint">Clear, descriptive, ~60–80 chars</span>
+            <span id="titleCount" class="count">0</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Slug</label>
+          <input id="slug" name="slug" required
+                 value="<%= d.slug || '' %>"
+                 placeholder="my-post-slug">
+          <div class="row">
+            <span class="hint">auto-fills from title; you can edit</span>
+            <span id="slugCount" class="count">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Excerpt -->
+      <div class="field" style="margin-top:10px">
+        <label>Excerpt</label>
+        <textarea id="excerpt" name="excerpt" rows="2" maxlength="400"
+                  placeholder="1–2 sentences teaser (≤ 400 chars)"><%= d.excerpt || '' %></textarea>
+        <div class="row">
+          <span class="hint">Shown in cards and previews</span>
+          <span id="excerptCount" class="count">0/400</span>
+        </div>
+      </div>
+
+      <!-- HTML body -->
+      <div class="field" style="margin-top:10px">
+        <label>HTML Body</label>
+        <textarea id="html" name="html" rows="12"
+                  placeholder="You can paste sanitized HTML (p, h2, ul, li, img, a...)"><%= d.html || '' %></textarea>
+        <div class="row">
+          <span class="hint">Basic HTML allowed; images auto-hosted via the Image field below</span>
+          <span id="wordCount" class="count">0 words</span>
+        </div>
+      </div>
+
+      <!-- Tags + read time -->
+      <div class="form-grid form-2" style="margin-top:10px">
+        <div class="field">
+          <label>Tag slug</label>
+          <input id="tag_slug" name="tag_slug" value="<%= d.tag_slug || '' %>" placeholder="manufacturing">
+        </div>
+        <div class="field">
+          <label>Tag name</label>
+          <input id="tag_name" name="tag_name" value="<%= d.tag_name || '' %>" placeholder="Manufacturing">
+        </div>
+      </div>
+
+      <div class="form-grid form-2" style="margin-top:10px">
+        <div class="field">
+          <label>Read minutes</label>
+          <input id="read_mins" type="number" min="1" max="60" name="read_mins"
+                 value="<%= d.read_mins || '' %>" placeholder="Auto-estimate available">
+          <div class="row">
+            <button type="button" class="btn-outline" id="autoRead">Auto-estimate</button>
+            <span class="hint">based on word count (~200 wpm)</span>
+          </div>
+        </div>
+
+        <div class="stack">
+          <label>Cover Image</label>
+          <input id="image" type="file" name="image" accept="image/*">
+          <img id="preview" class="preview" alt="Cover preview">
+          <div class="hint">Recommended 1200×675 (16:9). JPG/PNG/WebP, ≤ 4MB.</div>
+        </div>
+      </div>
+
+      <div class="card note" style="margin-top:10px">
+        <div class="row" style="justify-content:space-between">
+          <label class="checkbox" style="margin:0">
+            <input type="checkbox" name="publish" value="1" <%= d.publish === '1' ? 'checked' : '' %> >
+            Publish immediately
+          </label>
+          <span class="hint">If unchecked, post is saved as draft</span>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn" type="submit">Create</button>
+        <a class="btn-outline" href="/admin/blog">Cancel</a>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    (function(){
+      const $ = (s)=>document.querySelector(s);
+      const title = $('#title'), slug = $('#slug'), excerpt = $('#excerpt'), html = $('#html');
+      const titleCount = $('#titleCount'), slugCount = $('#slugCount'), excerptCount = $('#excerptCount'), wordCount = $('#wordCount');
+      const read = $('#read_mins'), autoRead = $('#autoRead');
+      const img = $('#image'), preview = $('#preview');
+
+      function slugify(s){
+        return String(s||'')
+          .trim().toLowerCase()
+          .replace(/[^a-z0-9-]+/g,'-')
+          .replace(/^-+|-+$/g,'')
+          .slice(0,160);
+      }
+      function updateCounts(){
+        titleCount.textContent = (title.value||'').length + ' chars';
+        slugCount.textContent  = (slug.value||'').length  + ' chars';
+        const ex = excerpt.value||'';
+        excerptCount.textContent = ex.length + '/400';
+        const text = (html.value || '').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+        const words = text ? text.split(' ').length : 0;
+        wordCount.textContent = words + ' words';
+      }
+      function maybeAutoFillSlug(){
+        if (!slug.value) slug.value = slugify(title.value);
+      }
+      function onTitleInput(){
+        if (!slug.value || slug.value === slugify(slug.dataset.prev||'')){
+          slug.dataset.prev = title.value;
+          slug.value = slugify(title.value);
+        }
+        updateCounts();
+      }
+      function onSlugInput(){
+        slug.value = slugify(slug.value);
+        updateCounts();
+      }
+      function estimateRead(){
+        const text = ((html.value || '') + ' ' + (excerpt.value || '')).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+        const words = text ? text.split(' ').length : 0;
+        const mins = Math.max(1, Math.round(words / 200));
+        read.value = mins;
+      }
+      function onImageChange(){
+        const f = img.files && img.files[0];
+        if (!f) { preview.src=''; preview.style.display='none'; return; }
+        const url = URL.createObjectURL(f);
+        preview.src = url;
+        preview.style.display = 'block';
+        preview.onload = ()=> URL.revokeObjectURL(url);
+      }
+
+      title.addEventListener('input', onTitleInput);
+      slug.addEventListener('input', onSlugInput);
+      excerpt.addEventListener('input', updateCounts);
+      html.addEventListener('input', updateCounts);
+      img.addEventListener('change', onImageChange);
+      autoRead.addEventListener('click', estimateRead);
+
+      // init
+      maybeAutoFillSlug();
+      updateCounts();
+    })();
+  </script>
+
+</body>
+</html>

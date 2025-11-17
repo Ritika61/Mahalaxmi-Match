@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head><%- include('../partials/head', { title: title || 'Message' }) %></head>
+<body>
+  <%- include('../partials/adminheader', { active: 'messages', csrfToken: csrfToken }) %>
+  <main class="section container">
+    <a class="btn-outline" href="/admin/messages">← Back</a>
+    <h1 style="margin-top:10px"><%= item.name %></h1>
+    <p><strong>Email:</strong> <a href="mailto:<%= item.email %>"><%= item.email %></a></p>
+    <p><strong>Country:</strong> <%= item.country || '-' %></p>
+    <p><strong>Company:</strong> <%= item.company || '-' %></p>
+    <p><strong>Received:</strong> <%= new Date(item.created_at).toLocaleString() %></p>
+
+    <h3>Message</h3>
+    <pre style="white-space:pre-wrap"><%= item.message %></pre>
+
+    <form action="/admin/messages/<%= item.id %>/delete" method="POST" onsubmit="return confirm('Delete this message?')">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn-outline" type="submit">Delete</button>
+    </form>
+  </main>
+</body>
+</html>

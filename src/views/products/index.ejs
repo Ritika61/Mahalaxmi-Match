@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <%- include('../partials/head', { title: title || 'Products' }) %>
+    <style>
+      /* Sky-blue product title links */
+      .products-grid h3 a{
+        color:#60a5fa;               /* sky blue */
+        text-decoration:none;
+      }
+      .products-grid h3 a:visited{
+        color:#60a5fa;               /* keep same after visit */
+      }
+      .products-grid h3 a:hover{
+        color:#93c5fd;               /* lighter on hover */
+      }
+      .products-grid h3{
+        margin-bottom:4px;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+
+    <main class="container section">
+      <h1>Products</h1>
+
+      <%
+        // Helper: return exactly the first sentence. If none, soft truncate.
+        function oneSentence(txt) {
+          const raw = String(txt || '').trim();
+          if (!raw) return '';
+          const m = raw.match(/[^.!?]+[.!?]/);
+          if (m && m[0]) return m[0].trim();
+          return (raw.length > 120 ? raw.slice(0, 117).trim() + '…' : raw);
+        }
+      %>
+
+      <!-- add a scoping class so styles only affect this grid -->
+      <ul class="cards features__grid products-grid">
+        <% if (!items || !items.length) { %>
+          <li class="card">
+            <p class="text-sub">No products yet.</p>
+          </li>
+        <% } %>
+
+        <% (items || []).forEach(p => { 
+             const preview = oneSentence(p.short_desc || p.description || '');
+        %>
+          <li class="card">
+            <% if (p.image) { %>
+              <img
+                src="<%= p.image %>"
+                alt="<%= p.name %>"
+                style="width:100%;border-radius:12px;margin-bottom:10px"
+                loading="lazy"
+                decoding="async"
+              >
+            <% } %>
+
+            <h3 class="mb-1">
+              <a href="/products/<%= p.slug %>"><%= p.name %></a>
+            </h3>
+
+            <p class="text-sub"><%= preview %></p>
+
+            <div style="margin-top:12px">
+              <a class="btn-outline"
+                 href="/products/<%= p.slug %>"
+                 aria-label="Learn more about <%= p.name %>">
+                Learn more
+              </a>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

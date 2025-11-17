@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head><%- include('../partials/head', { title: (title || 'Blog') }) %></head>
+<body>
+  <%- include('../partials/adminheader', { active: 'blog', csrfToken: csrfToken }) %>
+
+  <main class="section container">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+      <h1 style="margin:0">Blog</h1>
+
+      <form method="get" action="/admin/blog" style="display:flex;gap:8px;align-items:center">
+        <label for="filter">Filter</label>
+        <select id="filter" name="filter" onchange="this.form.submit()">
+          <option value="all"       <%= (filter==='all') ? 'selected' : '' %>>All</option>
+          <option value="published" <%= (filter==='published') ? 'selected' : '' %>>Published</option>
+          <option value="draft"     <%= (filter==='draft') ? 'selected' : '' %>>Draft</option>
+        </select>
+        <noscript><button class="btn-outline" type="submit">Apply</button></noscript>
+      </form>
+
+      <a class="btn" href="/admin/blog/new">+ New post</a>
+    </div>
+
+    <% if (!items || !items.length) { %>
+      <div class="card" style="padding:16px;margin-top:16px">No posts yet.</div>
+    <% } else { %>
+      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+        <% items.forEach(p => { %>
+          <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px">
+            <% if (p.image) { %>
+              <img src="<%= p.image %>" alt="" style="width:100%;height:150px;object-fit:cover;border-radius:10px">
+            <% } %>
+            <h3 style="margin:0"><%= p.title %></h3>
+            <div class="small text-sub">/<%= p.slug %></div>
+            <% if (p.excerpt) { %><p class="text-sub"><%= p.excerpt %></p><% } %>
+            <div class="small text-sub">
+              <%= p.published_at ? ('Published: ' + new Date(p.published_at).toLocaleString()) : 'Draft' %>
+              <% if (p.read_mins) { %> · <%= p.read_mins %> min read<% } %>
+            </div>
+
+            <div style="margin-top:auto;display:flex;gap:8px;flex-wrap:wrap">
+              <% if (p.published_at) { %>
+                <form action="/admin/blog/<%= p.id %>/unpublish?filter=<%= encodeURIComponent(filter||'all') %>" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn-outline" type="submit">Unpublish</button>
+                </form>
+              <% } else { %>
+                <form action="/admin/blog/<%= p.id %>/publish?filter=<%= encodeURIComponent(filter||'all') %>" method="post">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn" type="submit">Publish</button>
+                </form>
+              <% } %>
+
+              <a class="btn-outline" href="/admin/blog/<%= p.id %>/edit">Edit</a>
+
+              <form action="/admin/blog/<%= p.id %>/delete?filter=<%= encodeURIComponent(filter||'all') %>" method="post" onsubmit="return confirm('Delete this post?')" style="display:inline">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn-outline" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+</body>
+</html>

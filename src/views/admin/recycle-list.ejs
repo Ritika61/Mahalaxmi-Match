@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: title || 'Recently Deleted' }) %>
+  <style>
+    .recycle-table{ width:100%; border-collapse: collapse; }
+    .recycle-table th, .recycle-table td{ padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.12); }
+    .recycle-table th{ text-align:left; opacity:.9; }
+    .tag{ display:inline-block; padding:.15rem .45rem; border:1px solid rgba(255,255,255,.18); border-radius:999px; font-size:.85rem; }
+    .actions form{ display:inline; margin-right:6px; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/adminheader', { active }) %>
+
+  <main class="container section">
+    <h1>Recently Deleted</h1>
+
+    <% if (!items || !items.length) { %>
+      <p class="text-sub">Nothing in the recycle bin.</p>
+    <% } else { %>
+      <table class="recycle-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name / Title</th>
+            <th>Original ID</th>
+            <th>Deleted By</th>
+            <th>Deleted At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% items.forEach(it => { %>
+          <tr>
+            <td><span class="tag"><%= it.entity_type %></span></td>
+            <td><%= it.name || '-' %></td>
+            <td><%= it.original_id || '-' %></td>
+            <td><%= it.deleted_by || '-' %></td>
+            <td><%= new Date(it.deleted_at).toLocaleString() %></td>
+            <td class="actions">
+              <form action="/admin/recycle/<%= it.id %>/restore" method="POST" style="display:inline">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn" type="submit">Restore</button>
+              </form>
+              <form action="/admin/recycle/<%= it.id %>/delete" method="POST" style="display:inline"
+                    onsubmit="return confirm('Delete permanently? This cannot be undone.')">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn-outline" type="submit">Delete permanently</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </main>
+</body>
+</html>

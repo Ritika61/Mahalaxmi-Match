@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head', { title: 'About Us' }) %>
+  <meta name="description" content="Jay Mahalaxmi Match Industries — quality safety matches, responsible manufacturing, certified processes, and trusted partners.">
+
+  <style>
+    /* ===== Layout helpers (respect your theme) ===== */
+    .about .grid{display:grid;gap:18px}
+    .about .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .about .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .about .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media (max-width:900px){ .about .grid-2,.about .grid-3,.about .grid-4{grid-template-columns:1fr} }
+
+    .about .muted{opacity:.85}
+    .about .lead{font-size:1.15rem;line-height:1.7}
+    .about .section{margin-top:26px}
+
+    .about .stat{
+      border:1px solid var(--line,rgba(255,255,255,.12));
+      border-radius:12px;padding:14px;text-align:center
+    }
+    .about .stat strong{font-size:1.6rem;display:block}
+    .about .badge{
+      display:inline-block;padding:.35rem .6rem;
+      border:1px solid var(--line,rgba(255,255,255,.18));
+      border-radius:999px;font-size:.9rem
+    }
+
+    /* ===== Card tiles (clickable) ===== */
+    .about .tile-card{
+      display:flex;gap:18px;align-items:center;
+      border:1px solid var(--line,rgba(255,255,255,.14));
+      background:var(--panel,rgba(255,255,255,.04));
+      border-radius:16px;padding:18px;
+      transition:transform .12s ease, box-shadow .12s ease;
+      cursor:zoom-in; text-decoration:none;
+    }
+    .about .tile-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.18)}
+    .about .tile-thumb{
+      flex:0 0 72px;width:72px;height:72px;border-radius:12px;overflow:hidden;
+      border:1px solid var(--line,rgba(255,255,255,.2));background:#000;
+    }
+    .about .tile-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .about .tile-meta strong{display:block;margin-bottom:4px}
+    .about .tile-meta .sub{opacity:.88;font-size:1rem;line-height:1.45}
+
+    /* Section backgrounds */
+    .about .section--certs{background:var(--panel,rgba(180,163,163,.03));border-radius:14px;padding:18px}
+    .about .section--partners{background:var(--panel,rgba(193,177,177,.03));border-radius:14px;padding:18px}
+    .about .section--sustain{background:transparent}
+
+    /* Sky-blue text inside certification/partner tiles */
+    .about #certifications .tile-card strong,
+    .about #certifications .tile-card .sub,
+    .about #partners .tile-card strong,
+    .about #partners .tile-card .sub{
+      color:var(--link-sky, #60a5fa);
+    }
+
+    /* === BIGGER certification & partner images === */
+    .about #certifications .tile-card,
+    .about #partners .tile-card{
+      gap:22px; padding:20px;
+    }
+    .about #certifications .tile-thumb,
+    .about #partners .tile-thumb{
+      flex:0 0 160px; width:160px; height:160px; border-radius:14px;
+    }
+    .about #certifications .tile-meta strong,
+    .about #partners .tile-meta strong{
+      font-size:1.18rem; line-height:1.28;
+    }
+    .about #certifications .tile-meta .sub,
+    .about #partners .tile-meta .sub{
+      font-size:1.03rem;
+    }
+    @media (max-width:900px){
+      .about #certifications .tile-thumb,
+      .about #partners .tile-thumb{ width:130px; height:130px; }
+      .about #certifications .tile-card,
+      .about #partners .tile-card{ gap:18px; padding:18px; }
+    }
+
+    /* Lightbox */
+    .lb{
+      position:fixed;inset:0;display:none;place-items:center;
+      background:rgba(0,0,0,.7);z-index:9999;padding:20px;
+    }
+    .lb[open]{display:grid}
+    .lb-inner{
+      max-width:min(1100px,95vw);width:100%;
+      background:var(--paper,rgba(0,0,0,.4));
+      border:1px solid var(--line,rgba(255,255,255,.18));
+      border-radius:14px;overflow:hidden;
+    }
+    .lb-head{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:10px 12px;border-bottom:1px solid var(--line,rgba(255,255,255,.16))
+    }
+    .lb-title{font-weight:700}
+    .lb-close{
+      border:1px solid var(--line,rgba(255,255,255,.2));background:transparent;
+      color:inherit;border-radius:10px;padding:6px 10px;cursor:pointer
+    }
+    .lb-body{background:#000;display:grid;place-items:center}
+    .lb-img{max-height:min(78vh,900px);max-width:100%;width:auto;height:auto;display:block}
+    .lb-caption{padding:10px 12px;border-top:1px solid var(--line,rgba(255,255,255,.16));opacity:.85}
+  </style>
+</head>
+
+<body class="about">
+  <%- include('partials/header') %>
+
+  <main class="container section">
+    <h1>About Jay Mahalaxmi Match Industries</h1>
+
+    <!-- Brand hero -->
+    <section class="card" style="overflow:hidden;padding:0;margin-bottom:20px">
+      <img src="/img/brand-hero.png" alt="Jay Mahalaxmi Match Industries product banner" style="width:100%;height:auto;display:block" loading="eager">
+    </section>
+
+    <!-- Intro / identity -->
+    <section>
+      <p class="lead muted">
+        उच्च गुणस्तरीय सलाइ — Quality safety matches, consistent performance, and responsible manufacturing.
+        From raw material sourcing to final packaging, every step is measured, traceable, and continuously improved.
+      </p>
+      <!-- <div class="grid grid-4" style="margin-top:16px">
+        <div class="stat"><strong>25+ yrs</strong><span class="muted">Manufacturing experience</span></div>
+        <div class="stat"><strong>30+</strong><span class="muted">Active SKUs</span></div>
+        <div class="stat"><strong>15+</strong><span class="muted">Export markets</span></div>
+        <div class="stat"><strong>99.8%</strong><span class="muted">On-time dispatch</span></div>
+      </div> -->
+    </section>
+
+    <!-- Story & values -->
+    <section class="section">
+      <div class="grid grid-2">
+        <div>
+          <h2>Our Story</h2>
+          <p>
+            We began as a small, quality-first workshop in Lumbini Province and grew into a modern facility by investing
+            in people, process control, and safety testing. Today, our brands are trusted across retail, hospitality,
+            and industrial segments.
+          </p>
+          <h3>Our Values</h3>
+          <ul class="muted">
+            <li><strong>Safety first</strong> — strict batch testing & traceability</li>
+            <li><strong>Quality always</strong> — standardized materials & in-process checks</li>
+            <li><strong>Reliability</strong> — stable supply, precise documentation</li>
+            <li><strong>Responsibility</strong> — cleaner energy & waste reduction</li>
+          </ul>
+        </div>
+        <div>
+          <h2>Manufacturing & QC</h2>
+          <p>
+            Our lines are designed for repeatability: controlled drying, head composition accuracy, friction/tensile tests,
+            moisture balance, and final carton drop tests. Each master carton is batch-coded for recall readiness.
+          </p>
+          <ul class="muted">
+            <li>Incoming QC for wood, paperboard, and chemicals</li>
+            <li>SPC on critical parameters</li>
+            <li>Retention samples for every shipment</li>
+            <li>Lot-wise Certificates of Analysis on request</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certifications -->
+    <section id="certifications" class="section section--certs">
+      <h2>Certifications & Compliance</h2>
+      <p class="muted">We operate under documented systems audited at regular intervals.</p>
+
+      <div class="grid grid-2" style="margin-top:10px">
+        <!-- Using your test image as requested -->
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="ISO 9001 — Quality Management" data-caption="Scope: Manufacturing and supply of safety matches">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="ISO 9001"></div>
+          <div class="tile-meta">
+            <strong>ISO 9001 — Quality Management</strong>
+            <span class="sub">Scope: Manufacturing and supply of safety matches</span>
+          </div>
+        </a>
+
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="ISO 14001 — Environmental Management" data-caption="Effluent, emissions, and waste tracking with KPIs">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="ISO 14001"></div>
+          <div class="tile-meta">
+            <strong>ISO 14001 — Environmental Management</strong>
+            <span class="sub">Effluent, emissions, and waste tracking with KPIs</span>
+          </div>
+        </a>
+
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="ISO 45001 — Occupational Health & Safety" data-caption="PPE training, incident reporting, and drills">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="ISO 45001"></div>
+          <div class="tile-meta">
+            <strong>ISO 45001 — Occupational Health & Safety</strong>
+            <span class="sub">PPE training, incident reporting, and drills</span>
+          </div>
+        </a>
+
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="Material Traceability / CoC" data-caption="Batch coding, supplier trace, and retention samples">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="Material Traceability"></div>
+          <div class="tile-meta">
+            <strong>Material Traceability / CoC</strong>
+            <span class="sub">Batch coding, supplier trace, and retention samples</span>
+          </div>
+        </a>
+      </div>
+
+      <p class="muted" style="margin-top:10px">
+        Region-specific declarations (REACH, RoHS, FSC, MSDS, TDS) can be shared on request.
+      </p>
+    </section>
+
+    <!-- Sustainability -->
+    <section class="section section--sustain">
+      <h2>Sustainability</h2>
+      <div class="grid grid-3">
+        <div class="card" style="padding:14px">
+          <span class="badge">Energy</span>
+          <p class="muted">High-efficiency boilers and LED lighting across the plant.</p>
+        </div>
+        <div class="card" style="padding:14px">
+          <span class="badge">Materials</span>
+          <p class="muted">Preference for sustainably sourced wood & certified paperboards.</p>
+        </div>
+        <div class="card" style="padding:14px">
+          <span class="badge">Waste</span>
+          <p class="muted">Segregation at source, chemical inventory logs, and spill protocols.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partners -->
+    <section id="partners" class="section section--partners">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0">Partners</h2>
+        <span class="muted">Distribution · Private Label · OEM</span>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:12px">
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="Retail Partner" data-caption="Regional retail network">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="Partner 1"></div>
+          <div class="tile-meta">
+            <strong>Retail Partner</strong>
+            <span class="sub">Regional retail network</span>
+          </div>
+        </a>
+
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="Hospitality Partner" data-caption="HORECA supply">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="Partner 2"></div>
+          <div class="tile-meta">
+            <strong>Hospitality Partner</strong>
+            <span class="sub">HORECA supply</span>
+          </div>
+        </a>
+
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="OEM / Private Label" data-caption="Custom sizes & packaging">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="Partner 3"></div>
+          <div class="tile-meta">
+            <strong>OEM / Private Label</strong>
+            <span class="sub">Custom sizes & packaging</span>
+          </div>
+        </a>
+
+        <a href="/img/roshan.jpg" class="tile-card lb-link" data-title="Export Partner" data-caption="International logistics">
+          <div class="tile-thumb"><img src="/img/roshan.jpg" alt="Partner 4"></div>
+          <div class="tile-meta">
+            <strong>Export Partner</strong>
+            <span class="sub">International logistics</span>
+          </div>
+        </a>
+      </div>
+      </p>
+    </section>
+
+    <!-- FAQs -->
+    <section class="section">
+      <h2>FAQs</h2>
+      <div class="grid">
+        <details class="card" style="padding:12px 14px">
+          <summary> What makes Jay Mahalaxmi matches different?</summary><br>
+          <p class="muted">Our splints are wax-dipped for cleaner ignition and smoother flame travel, with consistent QC on first-strike performance, low smoke, and neat packaging—ideal for kitchens, temples, and outdoor use.</p>
+        </details>
+        <details class="card" style="padding:12px 14px">
+          <summary>How should I store matches during monsoon season?</summary><br>
+          <p class="muted">Keep boxes dry and airtight: use a tin/jar or zipper bag with a silica gel packet, and spare striker inside. Avoid bathrooms/windowsills; rotate older boxes first.</p>
+        </details>
+        <details class="card" style="padding:12px 14px">
+          <summary>Where do you ship and how long does delivery take?</summary><br>
+          <p class="muted">We ship nationwide via trusted couriers; pickup is available on request. Standard delivery is typically 2–5 working days (location dependent). Large/bulk orders may have a lead time—our team will confirm once you share quantities.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox -->
+  <dialog class="lb" id="lightbox">
+    <div class="lb-inner">
+      <div class="lb-head">
+        <div class="lb-title" id="lbTitle">Preview</div>
+        <button class="lb-close" id="lbClose" type="button" aria-label="Close">Close</button>
+      </div>
+      <div class="lb-body">
+        <img id="lbImg" class="lb-img" src="" alt="">
+      </div>
+      <div class="lb-caption" id="lbCaption"></div>
+    </div>
+  </dialog>
+
+  <script>
+    (function(){
+      const lb = document.getElementById('lightbox');
+      const lbImg = document.getElementById('lbImg');
+      const lbTitle = document.getElementById('lbTitle');
+      const lbCaption = document.getElementById('lbCaption');
+      const lbClose = document.getElementById('lbClose');
+
+      function openLB(href, title, caption){
+        lbImg.src = href;
+        lbImg.alt = title || 'Preview';
+        lbTitle.textContent = title || 'Preview';
+        lbCaption.textContent = caption || '';
+        lb.showModal ? lb.showModal() : lb.setAttribute('open','');
+      }
+      function closeLB(){
+        lbImg.src = '';
+        lb.close ? lb.close() : lb.removeAttribute('open');
+      }
+
+      lbClose.addEventListener('click', closeLB);
+      lb.addEventListener('click', (e)=>{ if(e.target === lb) closeLB(); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLB(); });
+
+      document.querySelectorAll('.lb-link').forEach(a=>{
+        a.addEventListener('click', (e)=>{
+          e.preventDefault();
+          openLB(a.getAttribute('href'), a.dataset.title, a.dataset.caption);
+        });
+      });
+    })();
+  </script>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
